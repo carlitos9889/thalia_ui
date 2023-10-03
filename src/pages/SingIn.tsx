@@ -3,30 +3,66 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
-import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-
-import { Link as LinkRouter } from "react-router-dom";
+import { Link as LinkRouter, useNavigate } from "react-router-dom";
+import axios from "axios";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
+import Grid from "@mui/material/Grid";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
+// eslint-disable-next-line react-refresh/only-export-components
+export enum LOGIN_STATUS {
+	INITIAL = "INITIAL",
+	LOADING = "LOADING",
+	SUCCESS = "SUCCESS",
+	FAILURE = "FAILURE",
+}
+
 export default function SignIn() {
-	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+	const [loginStatus, setloginStatus] = React.useState<LOGIN_STATUS>(
+		LOGIN_STATUS.INITIAL
+	);
+
+	const navigate = useNavigate();
+
+	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const data = new FormData(event.currentTarget);
 		console.log({
 			email: data.get("email"),
 			password: data.get("password"),
 		});
+
+		const axiosInstance = axios.create({
+			baseURL: "http://localhost:3000/api",
+		});
+
+		try {
+			const response = await axiosInstance.post("/v1/auth/login", {
+				email: data.get("email"),
+				password: data.get("password"),
+			});
+			localStorage.setItem("token", response.data.token);
+			setloginStatus(LOGIN_STATUS.SUCCESS);
+			navigate("/main", {
+				replace: true,
+				state: { token: response.data.token, user: response.data.user },
+			});
+		} catch (error) {
+			setloginStatus(LOGIN_STATUS.FAILURE);
+		}
 	};
+
+	React.useEffect(() => {
+		localStorage.getItem("token") && navigate("/main", { replace: true });
+	});
 
 	return (
 		<ThemeProvider theme={defaultTheme}>
@@ -57,7 +93,7 @@ export default function SignIn() {
 							required
 							fullWidth
 							id="email"
-							label="Correo Electrónico"
+							label="Email Address"
 							name="email"
 							autoComplete="email"
 							autoFocus
@@ -67,17 +103,12 @@ export default function SignIn() {
 							required
 							fullWidth
 							name="password"
-							label="contraseña"
+							label="Password"
 							type="password"
 							id="password"
 							autoComplete="current-password"
 						/>
-						<FormControlLabel
-							control={
-								<Checkbox value="remember" color="primary" />
-							}
-							label="Recordar credenciales"
-						/>
+
 						<Button
 							type="submit"
 							fullWidth
@@ -86,18 +117,41 @@ export default function SignIn() {
 						>
 							Sign In
 						</Button>
+						<Snackbar
+							open={loginStatus === LOGIN_STATUS.SUCCESS}
+							autoHideDuration={6000}
+							onClose={() => setloginStatus(LOGIN_STATUS.INITIAL)}
+						>
+							<Alert
+								onClose={() =>
+									setloginStatus(LOGIN_STATUS.INITIAL)
+								}
+								severity="success"
+								sx={{ width: "100%" }}
+							>
+								Login success
+							</Alert>
+						</Snackbar>
+						<Snackbar
+							open={loginStatus === LOGIN_STATUS.FAILURE}
+							autoHideDuration={6000}
+							onClose={() => setloginStatus(LOGIN_STATUS.INITIAL)}
+						>
+							<Alert
+								onClose={() =>
+									setloginStatus(LOGIN_STATUS.INITIAL)
+								}
+								severity="error"
+								sx={{ width: "100%" }}
+							>
+								Credenciales Incorrectos!
+							</Alert>
+						</Snackbar>
 						<Grid container>
 							<Grid item>
-								<LinkRouter to={"/"}>
-									<Link>
-										{
-											"Usted no tiene una cuenta? Regístrese"
-										}
-									</Link>
+								<LinkRouter to={"/register"}>
+									{"Don't have an account? Sign Up"}
 								</LinkRouter>
-								{/* <Link href="#" variant="body2">
-									{"Usted no tiene una cuenta? Regístrese"}
-								</Link> */}
 							</Grid>
 						</Grid>
 					</Box>

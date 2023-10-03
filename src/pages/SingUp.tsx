@@ -8,21 +8,75 @@ import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import MultipleSelectChip from "../components/CustomSelect";
+import { axiosInstance } from "../config/axios";
+import { LOGIN_STATUS } from "./SingIn";
+import { Snackbar, Alert, Stack } from "@mui/material";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
 export default function SignUp() {
-	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+	const [personName, setPersonName] = React.useState<string[]>(["user"]);
+	const [loginStatus, setloginStatus] = React.useState<LOGIN_STATUS>(
+		LOGIN_STATUS.INITIAL
+	);
+
+	const [statusCode, setStatusCode] = React.useState<number>(0);
+	const navigate = useNavigate();
+	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const data = new FormData(event.currentTarget);
 		console.log({
 			email: data.get("email"),
 			password: data.get("password"),
+			lastName: data.get("lastName"),
+			firstName: data.get("firstName"),
+			organismo: data.get("organismo"),
+			address: data.get("address"),
+			roles: personName,
 		});
+
+		try {
+			axiosInstance.defaults.headers.post[
+				"Authorization"
+			] = `Bearer ${localStorage.getItem("token")}`;
+			const response = await axiosInstance.post("/v1/auth/register", {
+				email: data.get("email"),
+				password: data.get("password"),
+				lastName: data.get("lastName"),
+				username: data.get("firstName"),
+				organismo: data.get("organismo"),
+				address: data.get("address"),
+				role: personName,
+			});
+			setStatusCode(response.status);
+			console.log({ statusCode: response.status });
+			if (response.data.token) {
+				localStorage.setItem("token", response.data.token);
+				setloginStatus(LOGIN_STATUS.SUCCESS);
+				navigate("/main", {
+					replace: true,
+					state: {
+						token: response.data.token,
+						user: response.data.user,
+					},
+				});
+			}
+		} catch (error: any) {
+			setStatusCode(error.response.status);
+			setloginStatus(LOGIN_STATUS.FAILURE);
+		}
 	};
+
+	React.useEffect(() => {
+		const token = localStorage.getItem("token");
+		if (!token) {
+			window.location.href = "/";
+		}
+	});
 
 	return (
 		<ThemeProvider theme={defaultTheme}>
@@ -91,22 +145,73 @@ export default function SignUp() {
 									autoComplete="new-password"
 								/>
 							</Grid>
-						</Grid>
-						<Button
-							type="submit"
-							fullWidth
-							variant="contained"
-							sx={{ mt: 3, mb: 2 }}
-						>
-							Sign Up
-						</Button>
-						<Grid container justifyContent="flex-end">
-							<Grid item>
-								<Link to={"/sign-in"}>
-									Already have an account? Sign in
-								</Link>
+							<Grid item xs={12}>
+								<TextField
+									fullWidth
+									name="organismo"
+									label="Organismo"
+									id="organismo"
+									autoComplete="organismo"
+								/>
+							</Grid>
+							<Grid item xs={12}>
+								<TextField
+									fullWidth
+									name="address"
+									label="Dirección"
+									id="address"
+									autoComplete="address"
+								/>
+							</Grid>
+							<Grid item xs={12}>
+								<MultipleSelectChip
+									personName={personName}
+									setPersonName={setPersonName}
+								/>
 							</Grid>
 						</Grid>
+						<Stack
+							spacing={{ xs: 1, sm: 2 }}
+							direction="row"
+							sx={{ marginTop: "30px" }}
+						>
+							<Button
+								type="submit"
+								fullWidth
+								variant="contained"
+								sx={{ mt: 3, mb: 2 }}
+							>
+								Sign Up
+							</Button>
+							<Button
+								onClick={() => {
+									navigate("/main");
+								}}
+								fullWidth
+								variant="contained"
+								sx={{ mt: 3, mb: 2 }}
+							>
+								go pagina principal
+							</Button>
+						</Stack>
+						<Snackbar
+							open={loginStatus == LOGIN_STATUS.FAILURE}
+							autoHideDuration={6000}
+							onClose={() => setloginStatus(LOGIN_STATUS.INITIAL)}
+						>
+							<Alert
+								onClose={() =>
+									setloginStatus(LOGIN_STATUS.INITIAL)
+								}
+								severity="error"
+								sx={{ width: "100%" }}
+							>
+								{statusCode == 403 &&
+									"You do not have permission, please contact the administrator"}
+								{statusCode !== 403 &&
+									"Formulario iconrrecto, por favor verifique los datos"}
+							</Alert>
+						</Snackbar>
 					</Box>
 				</Box>
 			</Container>
