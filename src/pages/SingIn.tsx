@@ -8,11 +8,10 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { Link as LinkRouter, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import axios from "axios";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
-import Grid from "@mui/material/Grid";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
@@ -147,13 +146,6 @@ export default function SignIn() {
 								Credenciales Incorrectos!
 							</Alert>
 						</Snackbar>
-						<Grid container>
-							<Grid item>
-								<LinkRouter to={"/register"}>
-									{"Don't have an account? Sign Up"}
-								</LinkRouter>
-							</Grid>
-						</Grid>
 					</Box>
 				</Box>
 			</Container>

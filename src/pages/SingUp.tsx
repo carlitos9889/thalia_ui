@@ -1,49 +1,55 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
-import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import MultipleSelectChip from "../components/CustomSelect";
 import { axiosInstance } from "../config/axios";
-import { LOGIN_STATUS } from "./SingIn";
-import { Snackbar, Alert, Stack } from "@mui/material";
+import {  Stack } from "@mui/material";
+import { CustomizedSnackbars, TYPE_MESSAGES } from "../components/MessageAlerts";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
 export default function SignUp() {
-	const [personName, setPersonName] = React.useState<string[]>(["user"]);
-	const [loginStatus, setloginStatus] = React.useState<LOGIN_STATUS>(
-		LOGIN_STATUS.INITIAL
-	);
+	const [personName, setPersonName] = React.useState<string[]>(["Usuario"]);
+	const [loginStatus, setloginStatus] = React.useState({
+		status: TYPE_MESSAGES.NOT_STATUS,
+		message: ''
+	});
 
-	const [statusCode, setStatusCode] = React.useState<number>(0);
-	const navigate = useNavigate();
+	// const navigate = useNavigate();
+	const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+		if (reason === 'clickaway') return;
+	
+		setloginStatus({...loginStatus, status: TYPE_MESSAGES.NOT_STATUS})
+	};
+
+
+	const getMessages = (message: string) => {
+		if(message.startsWith('username')) return 'Nombre es requerido';
+		if(message.startsWith('lastName')) return 'Apellido es requerido';
+		if(message.startsWith('password')) return 'Contraseña inválida';
+		if(message.startsWith('email')) return 'Correo Inválido';
+		if(message.startsWith('organismo')) return 'Organismo es requerido';
+		if(message.startsWith('address')) return 'Dirección es requerido';
+		if(message.startsWith('Key')) return message.replace('Key', '').replace('(email)=', '');
+		return 'Error en el formulario contacte al administrador'
+	}
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const data = new FormData(event.currentTarget);
-		console.log({
-			email: data.get("email"),
-			password: data.get("password"),
-			lastName: data.get("lastName"),
-			firstName: data.get("firstName"),
-			organismo: data.get("organismo"),
-			address: data.get("address"),
-			roles: personName,
-		});
+		
 
 		try {
-			axiosInstance.defaults.headers.post[
-				"Authorization"
-			] = `Bearer ${localStorage.getItem("token")}`;
-			const response = await axiosInstance.post("/v1/auth/register", {
+			axiosInstance.defaults.headers.post["Authorization"] = `Bearer ${localStorage.getItem("token")}`;
+			await axiosInstance.post("/v1/auth/register", {
 				email: data.get("email"),
 				password: data.get("password"),
 				lastName: data.get("lastName"),
@@ -52,23 +58,29 @@ export default function SignUp() {
 				address: data.get("address"),
 				role: personName,
 			});
-			setStatusCode(response.status);
-			console.log({ statusCode: response.status });
-			if (response.data.token) {
-				localStorage.setItem("token", response.data.token);
-				setloginStatus(LOGIN_STATUS.SUCCESS);
-				navigate("/main", {
-					replace: true,
-					state: {
-						token: response.data.token,
-						user: response.data.user,
-					},
-				});
-			}
+			
+			setloginStatus({
+				status: TYPE_MESSAGES.SUCCESS,
+				message: 'Registro agregado correctamente'
+			})
+		
 		} catch (error: any) {
-			setStatusCode(error.response.status);
-			setloginStatus(LOGIN_STATUS.FAILURE);
+			if(error && error.response && error.response.data){
+				const data = error.response.data;
+				const message = Array.isArray(data.message) ? data.message[0] : data.message
+				setloginStatus({
+					status: TYPE_MESSAGES.ERROR,
+					message: getMessages(message)
+				})
+			}else {
+				setloginStatus({
+					status: TYPE_MESSAGES.ERROR,
+					message: 'Error desconocido hable con el administrador'
+				})
+			}
 		}
+
+		
 	};
 
 	React.useEffect(() => {
@@ -90,11 +102,11 @@ export default function SignUp() {
 						alignItems: "center",
 					}}
 				>
-					<Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+					{/* <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
 						<LockOutlinedIcon />
-					</Avatar>
+					</Avatar> */}
 					<Typography component="h1" variant="h5">
-						Sign up
+						Registro de Usuarios
 					</Typography>
 					<Box
 						component="form"
@@ -147,6 +159,7 @@ export default function SignUp() {
 							</Grid>
 							<Grid item xs={12}>
 								<TextField
+									required
 									fullWidth
 									name="organismo"
 									label="Organismo"
@@ -157,6 +170,7 @@ export default function SignUp() {
 							<Grid item xs={12}>
 								<TextField
 									fullWidth
+									required
 									name="address"
 									label="Dirección"
 									id="address"
@@ -181,37 +195,11 @@ export default function SignUp() {
 								variant="contained"
 								sx={{ mt: 3, mb: 2 }}
 							>
-								Sign Up
+								Registrar Usuario
 							</Button>
-							<Button
-								onClick={() => {
-									navigate("/main");
-								}}
-								fullWidth
-								variant="contained"
-								sx={{ mt: 3, mb: 2 }}
-							>
-								go pagina principal
-							</Button>
+							
 						</Stack>
-						<Snackbar
-							open={loginStatus == LOGIN_STATUS.FAILURE}
-							autoHideDuration={6000}
-							onClose={() => setloginStatus(LOGIN_STATUS.INITIAL)}
-						>
-							<Alert
-								onClose={() =>
-									setloginStatus(LOGIN_STATUS.INITIAL)
-								}
-								severity="error"
-								sx={{ width: "100%" }}
-							>
-								{statusCode == 403 &&
-									"You do not have permission, please contact the administrator"}
-								{statusCode !== 403 &&
-									"Formulario iconrrecto, por favor verifique los datos"}
-							</Alert>
-						</Snackbar>
+						<CustomizedSnackbars open={loginStatus.status !== TYPE_MESSAGES.NOT_STATUS} message={loginStatus.message} type={loginStatus.status} closeFunction={handleClose}/>
 					</Box>
 				</Box>
 			</Container>
