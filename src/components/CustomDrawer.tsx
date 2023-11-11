@@ -15,11 +15,12 @@ import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import SupervisedUserCircleIcon from '@mui/icons-material/SupervisedUserCircle';
 import SmartButtonIcon from '@mui/icons-material/SmartButton';
 import { useState } from 'react';
-import { DataTableUser } from './CustomTableUser';
 import SignUp from '../pages/SingUp';
 import IconButton from '@mui/material/IconButton';
 import { Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { RegisterFuente } from '../pages/RegisterFuente';
+import { TableUserEditable } from './CustomTableUserEditable';
 
 const drawerWidth = 240;
 
@@ -70,7 +71,7 @@ export const  CustomDrawerPermanent = () => {
       >
         <Toolbar />
         {
-            showItem === MENU.TABLE_USER && <DataTableUser/>
+            showItem === MENU.TABLE_USER && <TableUserEditable/>
         }
         {
             showItem === MENU.TABLE_FUENTE && <h1>Hola table Fuente</h1>
@@ -79,7 +80,7 @@ export const  CustomDrawerPermanent = () => {
             showItem === MENU.REGISTER_USER && <SignUp/>
         }
         {
-            showItem === MENU.REGISTER_FUENTE && <h1>Hola table Fuente</h1>
+            showItem === MENU.REGISTER_FUENTE && <RegisterFuente/>
         }
       </Box>
       <Drawer
