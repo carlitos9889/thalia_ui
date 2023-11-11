@@ -25,7 +25,7 @@ export default function SignUp() {
 	});
 
 	// const navigate = useNavigate();
-	const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+	const handleClose = (_event?: React.SyntheticEvent | Event, reason?: string) => {
 		if (reason === 'clickaway') return;
 	
 		setloginStatus({...loginStatus, status: TYPE_MESSAGES.NOT_STATUS})

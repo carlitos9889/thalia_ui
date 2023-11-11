@@ -1,114 +1,44 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import {
-  GridRowsProp,
   GridRowModesModel,
   GridRowModes,
   DataGrid,
   GridColDef,
-  GridToolbarContainer,
   GridActionsCellItem,
   GridEventListener,
   GridRowId,
   GridRowModel,
   GridRowEditStopReasons,
 } from '@mui/x-data-grid';
-import {
-  randomCreatedDate,
-  randomTraderName,
-  randomId,
-  randomArrayItem,
-} from '@mui/x-data-grid-generator';
+
 import { UserDB } from '../interfaces/user';
 import axios from 'axios';
 import { AlertDialogSlide } from './AlertDialog';
-
-const roles = ['Market', 'Finance', 'Development'];
-const randomRole = () => {
-  return randomArrayItem(roles);
-};
-
-const initialRows: GridRowsProp = [
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 25,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 36,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 19,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 28,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 23,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-];
-
-interface EditToolbarProps {
-  setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
-  setRowModesModel: (
-    newModel: (oldModel: GridRowModesModel) => GridRowModesModel,
-  ) => void;
-}
-
-function EditToolbar(props: EditToolbarProps) {
-  const { setRows, setRowModesModel } = props;
-
-  const handleClick = () => {
-    const id = randomId();
-    setRows((oldRows) => [...oldRows, { id, name: '', age: '', isNew: true }]);
-    setRowModesModel((oldModel) => ({
-      ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
-    }));
-  };
-
-  return (
-    <GridToolbarContainer>
-      <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
-        Add record
-      </Button>
-    </GridToolbarContainer>
-  );
-}
+import { CustomizedSnackbars, TYPE_MESSAGES } from './MessageAlerts';
 
 export const TableUserEditable = () => {
-  const [rows, setRows] = React.useState(initialRows);
   const [users, setusers] = React.useState<UserDB[]>([])
-  const [openDialog, setopenDialog] = React.useState(false);
+  const [openDialog, setopenDialog] = React.useState<boolean>(false);
+  const [openDialogDeleted, setopenDialogDeleted] = React.useState<boolean>(false);
+  const [openSnack, setopenSnack] = React.useState({
+    status: TYPE_MESSAGES.NOT_STATUS,
+    message: '',
+  });
 
 const refRowValidModel = React.useRef<GridRowModel | null>(null);
+const refRowVaalidId = React.useRef<GridRowId | null>(null);
 
 
 
+  const handleCloseDialogDeleted = () => {
+   setopenDialogDeleted(false); 
+  }
   const handleClosedialog = () => {
     setopenDialog(false);
   }
@@ -119,30 +49,76 @@ const refRowValidModel = React.useRef<GridRowModel | null>(null);
     return updatedRow;
   };
 
+  const getMessages = (message: string) => {
+    if(message.startsWith('username')) return 'Nombre es requerido';
+    if(message.startsWith('lastName')) return 'Apellido es requerido';
+    if(message.startsWith('password')) return 'Contraseña inválida';
+    if(message.startsWith('email')) return 'Correo Inválido';
+    if(message.startsWith('organismo')) return 'Organismo es requerido';
+    if(message.startsWith('address')) return 'Dirección es requerido';
+    if(message.startsWith('Key')) return message.replace('Key', '').replace('(email)=', '');
+    return 'Error en el formulario contacte al administrador'
+}
+
   const handleEditUser = async (newRow: GridRowModel) => {
     const axiosInstance = axios.create({
         baseURL: "http://localhost:3000/api"
     });
     delete newRow.isDeleted;
     delete newRow.isNew;
-    const response = await axiosInstance.patch<UserDB>(`v1/auth/${newRow.id}`, {...newRow});
-    const usersUpdated = response.data;
-    setusers(users.map((user) => (user.id === newRow.id ? usersUpdated : user)));
-    setRowModesModel({ ...rowModesModel, [newRow.id]: { mode: GridRowModes.View } });
-    return usersUpdated;
+    try {
+        const response = await axiosInstance.patch<UserDB>(`v1/auth/${newRow.id}`, {...newRow});
+        const usersUpdated = response.data;
+        setusers(users.map((user) => (user.id === newRow.id ? usersUpdated : user)));
+        setRowModesModel({ ...rowModesModel, [newRow.id]: { mode: GridRowModes.View } });
+        setopenSnack({
+            status: TYPE_MESSAGES.SUCCESS,
+            message: 'Registro actualizado correctamente'
+        })
+        return usersUpdated;
+    } catch (error: any) {
+        if(error && error.response && error.response.data){
+            const data = error.response.data;
+            const message = Array.isArray(data.message) ? data.message[0] : data.message
+            setopenSnack({
+                status: TYPE_MESSAGES.ERROR,
+                message: getMessages(message)
+            })
+        }else {
+            setopenSnack({
+                status: TYPE_MESSAGES.ERROR,
+                message: 'Error desconocido hable con el administrador'
+            })
+        }
+    }
 
   }
 
-  const handleRemoveById = (id: string) => {
+  const handleRemoveById = async (id: string) => {
+
     const axiosInstance = axios.create({
         baseURL: "http://localhost:3000/api"
     });
-    axiosInstance.delete(`v1/auth/${id}`).then(resp => {
-        const userDeleted = resp.data;
-        console.log({ userDeleted });
-    })
 
-    handleClosedialog();
+    try {
+        await axiosInstance.delete(`v1/auth/${id}`);
+        setusers(users.filter((user) => user.id !== id));
+    } catch (error: any) {
+        if(error && error.response && error.response.data){
+            const data = error.response.data;
+            const message = Array.isArray(data.message) ? data.message[0] : data.message
+            setopenSnack({
+                status: TYPE_MESSAGES.ERROR,
+                message: getMessages(message)
+            })
+        }else {
+            setopenSnack({
+                status: TYPE_MESSAGES.ERROR,
+                message: 'Error desconocido hable con el administrador'
+            })
+        }
+    }
+    handleCloseDialogDeleted();
   }
 
   React.useEffect(() => {
@@ -174,12 +150,12 @@ const refRowValidModel = React.useRef<GridRowModel | null>(null);
   const handleSaveClick = (id: GridRowId) => () => {
     refRowValidModel.current = users.find(user => user.id === id) || null;
     setopenDialog(true);
-    // setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
   const handleDeleteClick = (id: GridRowId) => () => {
-    handleRemoveById(id.toString());
-    setusers(users.filter((user) => user.id !== id));
+    refRowVaalidId.current  = id;
+    setopenDialogDeleted(true);
+    // setusers(users.filter((user) => user.id !== id));
   };
 
   const handleCancelClick = (id: GridRowId) => () => {
@@ -187,11 +163,10 @@ const refRowValidModel = React.useRef<GridRowModel | null>(null);
       ...rowModesModel,
       [id]: { mode: GridRowModes.View, ignoreModifications: true },
     });
-
-    const editedRow = rows.find((row) => row.id === id);
-    if (editedRow!.isNew) {
-      setRows(rows.filter((row) => row.id !== id));
-    }
+    // const editedRow = users.find((user) => user.id === id);
+    // if (editedRow!.isNew) {
+    //   setusers(users.filter((user) => user.id !== id));
+    // }
   };
 
   
@@ -255,6 +230,10 @@ const refRowValidModel = React.useRef<GridRowModel | null>(null);
         },
       },
   ];
+  const handleClose = (_event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') return;
+    setopenSnack({...openSnack, status: TYPE_MESSAGES.NOT_STATUS})
+};
 
   return (
     <Box
@@ -277,14 +256,17 @@ const refRowValidModel = React.useRef<GridRowModel | null>(null);
         onRowModesModelChange={handleRowModesModelChange}
         onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
-        slots={{
-          toolbar: EditToolbar,
-        }}
         slotProps={{
           toolbar: { users, setusers },
         }}
       />
       <AlertDialogSlide message = { 'Desea actualizar el usuario' } open = {openDialog} handleClose={handleClosedialog} handleAction={processRowUpdate} row={refRowValidModel.current!}/>
+      <AlertDialogSlide message = { 'Desea Eliminar el usuario' } open = {openDialogDeleted} handleClose={handleCloseDialogDeleted} handleDelete={handleRemoveById} id={refRowVaalidId.current!}/>
+      <CustomizedSnackbars 
+        open={openSnack.status !== TYPE_MESSAGES.NOT_STATUS} 
+        message={openSnack.message} type={openSnack.status} 
+        closeFunction={handleClose}
+      />
     </Box>
   );
 }

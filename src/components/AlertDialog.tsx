@@ -8,7 +8,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Slide from '@mui/material/Slide';
 import { TransitionProps } from '@mui/material/transitions';
-import { GridRowModel } from '@mui/x-data-grid';
+import { GridRowId, GridRowModel } from '@mui/x-data-grid';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -23,12 +23,14 @@ const Transition = React.forwardRef(function Transition(
 interface Props {
     message: string;
     open: boolean;
-    row: GridRowModel;
+    row?: GridRowModel;
+    id?: GridRowId;
+    handleDelete?: (id: string) => void;
     handleClose: () => void;
-    handleAction: (row: GridRowModel) => void;
+    handleAction?: (row: GridRowModel) => void;
 }
 
-export const AlertDialogSlide = ({open,message, handleAction, handleClose, row}: Props) => {
+export const AlertDialogSlide = ({open,message, handleAction, handleClose, row, id, handleDelete}: Props) => {
 
   return (
       <Dialog
@@ -38,18 +40,23 @@ export const AlertDialogSlide = ({open,message, handleAction, handleClose, row}:
         onClose={handleClose}
         aria-describedby="alert-dialog-slide-description"
       >
-        <DialogTitle>{"Use Google's location service?"}</DialogTitle>
+        <DialogTitle>{"Atención"}</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-slide-description">
             {message}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Disagree</Button>
+          <Button onClick={handleClose}>Cancelar</Button>
           <Button onClick={() => {
-              handleAction(row);
+            if(handleAction){
+                handleAction(row!);
+            }
+            if(handleDelete){
+                handleDelete(id!.toString())
+            }
               handleClose();
-          }}>Agree</Button>
+          }}>Aceptar</Button>
         </DialogActions>
       </Dialog>
   );
