@@ -21,6 +21,7 @@ import { Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { RegisterFuente } from '../pages/RegisterFuente';
 import { TableUserEditable } from './CustomTableUserEditable';
+import { TableFuenteEditable } from './CustomTableFuenteEditable';
 
 const drawerWidth = 240;
 
@@ -74,7 +75,7 @@ export const  CustomDrawerPermanent = () => {
             showItem === MENU.TABLE_USER && <TableUserEditable/>
         }
         {
-            showItem === MENU.TABLE_FUENTE && <h1>Hola table Fuente</h1>
+            showItem === MENU.TABLE_FUENTE && <TableFuenteEditable/>
         }
         {
             showItem === MENU.REGISTER_USER && <SignUp/>

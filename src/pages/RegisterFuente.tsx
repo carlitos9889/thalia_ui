@@ -12,6 +12,9 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {  Avatar, Checkbox, FormControlLabel, Stack } from "@mui/material";
 // import { CustomizedSnackbars, TYPE_MESSAGES } from "../components/MessageAlerts";
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import { axiosInstance } from "../config/axios";
+import { useState } from "react";
+import { CustomizedSnackbars, TYPE_MESSAGES } from "../components/MessageAlerts";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
@@ -22,6 +25,11 @@ export const  RegisterFuente = () => {
 	// 	status: TYPE_MESSAGES.NOT_STATUS,
 	// 	message: ''
 	// });
+	const [check, setcheck] = useState(true);
+	const [statusCreate, setstatusCreate] = useState({
+		status: TYPE_MESSAGES.NOT_STATUS,
+		message: '',
+	})
 
 	// // const navigate = useNavigate();
 	// const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
@@ -31,56 +39,57 @@ export const  RegisterFuente = () => {
 	// };
 
 
-	// const getMessages = (message: string) => {
-	// 	if(message.startsWith('username')) return 'Nombre es requerido';
-	// 	if(message.startsWith('lastName')) return 'Apellido es requerido';
-	// 	if(message.startsWith('password')) return 'Contraseña inválida';
-	// 	if(message.startsWith('email')) return 'Correo Inválido';
-	// 	if(message.startsWith('organismo')) return 'Organismo es requerido';
-	// 	if(message.startsWith('address')) return 'Dirección es requerido';
-	// 	if(message.startsWith('Key')) return message.replace('Key', '').replace('(email)=', '');
-	// 	return 'Error en el formulario contacte al administrador'
-	// }
+	const getMessages = (message: string) => {
+		if(message.startsWith('title')) return 'Título es requerido';
+		if(message.startsWith('materia')) return 'La materia es requerida';
+		if(message.startsWith('organization')) return 'La organización es requerida';
+		if(message.startsWith('organismo')) return 'Organismo es requerido';
+		if(message.startsWith('url')) return 'El url es requerido';
+		if(message.startsWith('Key')) return message.replace('Key (title)=', '');
+		return 'Error en el formulario contacte al administrador'
+	}
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		// const data = new FormData(event.currentTarget);
+		const data = new FormData(event.currentTarget);
 		
 
 		try {
-			// axiosInstance.defaults.headers.post["Authorization"] = `Bearer ${localStorage.getItem("token")}`;
-			// await axiosInstance.post("/v1/auth/register", {
-			// 	email: data.get("email"),
-			// 	password: data.get("password"),
-			// 	lastName: data.get("lastName"),
-			// 	username: data.get("firstName"),
-			// 	organismo: data.get("organismo"),
-			// 	address: data.get("address"),
-			// 	role: personName,
-			// });
-			
-			// setloginStatus({
-			// 	status: TYPE_MESSAGES.SUCCESS,
-			// 	message: 'Registro agregado correctamente'
-			// })
+			await axiosInstance.post("/v1/fuentes/create-fuente", {
+				title: data.get('title'),
+				organization: data.get('organization'),
+				frequency: Number(data.get('frequency') || 0),
+				isOpen: check,
+				editores: data.get('editores'),
+				materia: data.get('materia'),
+				url: data.get('url'),
+			});
+
+			setstatusCreate({
+				status: TYPE_MESSAGES.SUCCESS,
+				message: 'Fuente agregada correctamente'
+			})
+
 		
 		} catch (error: any) {
-			// if(error && error.response && error.response.data){
-			// 	const data = error.response.data;
-			// 	const message = Array.isArray(data.message) ? data.message[0] : data.message
-			// 	setloginStatus({
-			// 		status: TYPE_MESSAGES.ERROR,
-			// 		message: getMessages(message)
-			// 	})
-			// }else {
-			// 	setloginStatus({
-			// 		status: TYPE_MESSAGES.ERROR,
-			// 		message: 'Error desconocido hable con el administrador'
-			// 	})
-			// }
+			if(error && error.response && error.response.data){
+				const data = error.response.data;
+				const message = Array.isArray(data.message) ? data.message[0] : data.message
+				setstatusCreate({
+					status: TYPE_MESSAGES.ERROR,
+					message: getMessages(message)
+				})
+			}else {
+				setstatusCreate({
+					status: TYPE_MESSAGES.ERROR,
+					message: 'Error desconocido hable con el administrador'
+				})
+			}
 		}
 
 		
 	};
+
+	
 
 	React.useEffect(() => {
 		const token = localStorage.getItem("token");
@@ -89,13 +98,19 @@ export const  RegisterFuente = () => {
 		}
 	});
 
+	function handleClose(_event?: Event | React.SyntheticEvent<Element, Event> | undefined, reason?: string | undefined): void {
+		if (reason === 'clickaway') return;
+	
+		setstatusCreate({...statusCreate, status: TYPE_MESSAGES.NOT_STATUS})
+	}
+
 	return (
 		<ThemeProvider theme={defaultTheme}>
 			<Container component="main" maxWidth="xs">
 				<CssBaseline />
 				<Box
 					sx={{
-						marginTop: 8,
+						// marginTop: 8,
 						display: "flex",
 						flexDirection: "column",
 						alignItems: "center",
@@ -129,6 +144,7 @@ export const  RegisterFuente = () => {
 								<TextField
 									required
 									fullWidth
+									defaultValue={'1'}
 									id="frequency"
 									label="Frecuencia"
 									type="number"
@@ -157,6 +173,15 @@ export const  RegisterFuente = () => {
 							</Grid>
 							<Grid item xs={12}>
 								<TextField
+									required
+									fullWidth
+									name="organization"
+									label="Organización"
+									id="organization"
+								/>
+							</Grid>
+							<Grid item xs={12}>
+								<TextField
 									fullWidth
 									required
 									name="url"
@@ -165,7 +190,9 @@ export const  RegisterFuente = () => {
 								/>
 							</Grid>
 						</Grid>
-						<FormControlLabel control={<Checkbox defaultChecked />} label="Está abierta la fuente?" />
+						<FormControlLabel onChange = {(va: any) => {
+							setcheck(va.target.checked);
+						}}control={<Checkbox value={check} />} label="Está abierta la fuente?" />
 						<Stack
 							spacing={{ xs: 1, sm: 2 }}
 							direction="row"
@@ -181,6 +208,7 @@ export const  RegisterFuente = () => {
 							</Button>
 							
 						</Stack>
+						<CustomizedSnackbars open={statusCreate.status !== TYPE_MESSAGES.NOT_STATUS} message={statusCreate.message} type={statusCreate.status} closeFunction={handleClose}/>
 					</Box>
 				</Box>
 			</Container>
