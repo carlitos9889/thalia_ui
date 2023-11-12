@@ -11,8 +11,11 @@ import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import MultipleSelectChip from "../components/CustomSelect";
 import { axiosInstance } from "../config/axios";
-import {  Stack } from "@mui/material";
-import { CustomizedSnackbars, TYPE_MESSAGES } from "../components/MessageAlerts";
+import { Stack } from "@mui/material";
+import {
+	CustomizedSnackbars,
+	TYPE_MESSAGES,
+} from "../components/MessageAlerts";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
@@ -21,34 +24,40 @@ export default function SignUp() {
 	const [personName, setPersonName] = React.useState<string[]>(["Usuario"]);
 	const [loginStatus, setloginStatus] = React.useState({
 		status: TYPE_MESSAGES.NOT_STATUS,
-		message: ''
+		message: "",
 	});
 
 	// const navigate = useNavigate();
-	const handleClose = (_event?: React.SyntheticEvent | Event, reason?: string) => {
-		if (reason === 'clickaway') return;
-	
-		setloginStatus({...loginStatus, status: TYPE_MESSAGES.NOT_STATUS})
+	const handleClose = (
+		_event?: React.SyntheticEvent | Event,
+		reason?: string
+	) => {
+		if (reason === "clickaway") return;
+
+		setloginStatus({ ...loginStatus, status: TYPE_MESSAGES.NOT_STATUS });
 	};
 
-
 	const getMessages = (message: string) => {
-		if(message.startsWith('username')) return 'Nombre es requerido';
-		if(message.startsWith('lastName')) return 'Apellido es requerido';
-		if(message.startsWith('password')) return 'Contraseña inválida';
-		if(message.startsWith('email')) return 'Correo Inválido';
-		if(message.startsWith('organismo')) return 'Organismo es requerido';
-		if(message.startsWith('address')) return 'Dirección es requerido';
-		if(message.startsWith('Key')) return message.replace('Key', '').replace('(email)=', '');
-		return 'Error en el formulario contacte al administrador'
-	}
+		if (message.startsWith("username")) return "Nombre es requerido";
+		if (message.startsWith("lastName")) return "Apellido es requerido";
+		if (message.startsWith("password")) return "Contraseña inválida";
+		if (message.startsWith("email")) return "Correo Inválido";
+		if (message.startsWith("organismo")) return "Organismo es requerido";
+		if (message.startsWith("address")) return "Dirección es requerido";
+		if (message.startsWith("El Nombre no puede")) return message;
+		if (message.startsWith("El Apellido no puede")) return message;
+		if (message.startsWith("Key"))
+			return message.replace("Key", "").replace("(email)=", "");
+		return "Error en el formulario contacte al administrador";
+	};
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const data = new FormData(event.currentTarget);
-		
 
 		try {
-			axiosInstance.defaults.headers.post["Authorization"] = `Bearer ${localStorage.getItem("token")}`;
+			axiosInstance.defaults.headers.post[
+				"Authorization"
+			] = `Bearer ${localStorage.getItem("token")}`;
 			await axiosInstance.post("/v1/auth/register", {
 				email: data.get("email"),
 				password: data.get("password"),
@@ -58,29 +67,28 @@ export default function SignUp() {
 				address: data.get("address"),
 				role: personName,
 			});
-			
+
 			setloginStatus({
 				status: TYPE_MESSAGES.SUCCESS,
-				message: 'Registro agregado correctamente'
-			})
-		
+				message: "Registro agregado correctamente",
+			});
 		} catch (error: any) {
-			if(error && error.response && error.response.data){
+			if (error && error.response && error.response.data) {
 				const data = error.response.data;
-				const message = Array.isArray(data.message) ? data.message[0] : data.message
+				const message = Array.isArray(data.message)
+					? data.message[0]
+					: data.message;
 				setloginStatus({
 					status: TYPE_MESSAGES.ERROR,
-					message: getMessages(message)
-				})
-			}else {
+					message: getMessages(message),
+				});
+			} else {
 				setloginStatus({
 					status: TYPE_MESSAGES.ERROR,
-					message: 'Error desconocido hable con el administrador'
-				})
+					message: "Error desconocido hable con el administrador",
+				});
 			}
 		}
-
-		
 	};
 
 	React.useEffect(() => {
@@ -196,9 +204,15 @@ export default function SignUp() {
 							>
 								Registrar Usuario
 							</Button>
-							
 						</Stack>
-						<CustomizedSnackbars open={loginStatus.status !== TYPE_MESSAGES.NOT_STATUS} message={loginStatus.message} type={loginStatus.status} closeFunction={handleClose}/>
+						<CustomizedSnackbars
+							open={
+								loginStatus.status !== TYPE_MESSAGES.NOT_STATUS
+							}
+							message={loginStatus.message}
+							type={loginStatus.status}
+							closeFunction={handleClose}
+						/>
 					</Box>
 				</Box>
 			</Container>
