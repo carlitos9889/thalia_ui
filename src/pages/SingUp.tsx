@@ -11,21 +11,40 @@ import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import MultipleSelectChip from "../components/CustomSelect";
 import { axiosInstance } from "../config/axios";
-import { Stack } from "@mui/material";
+import {
+	FormControl,
+	InputLabel,
+	MenuItem,
+	Select,
+	Stack,
+} from "@mui/material";
 import {
 	CustomizedSnackbars,
 	TYPE_MESSAGES,
 } from "../components/MessageAlerts";
+import { MUNICIPIOS_BY_PROVINCIAS, PROVINCIAS } from "../constants/provincias";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
 export default function SignUp() {
 	const [personName, setPersonName] = React.useState<string[]>(["Usuario"]);
+	const [provincia, setprovincia] = React.useState<string>("La Habana");
+	const [municipioSelected, setmunicipioSelected] = React.useState("");
+	const [municipiosByProvincia, setMunicipiosByProvincia] = React.useState(
+		MUNICIPIOS_BY_PROVINCIAS["La Habana"]
+	);
+
 	const [loginStatus, setloginStatus] = React.useState({
 		status: TYPE_MESSAGES.NOT_STATUS,
 		message: "",
 	});
+
+	React.useEffect(() => {
+		const municipios = (MUNICIPIOS_BY_PROVINCIAS as any)[provincia];
+		setMunicipiosByProvincia(municipios);
+		setmunicipioSelected(municipios[0]);
+	}, [provincia]);
 
 	// const navigate = useNavigate();
 	const handleClose = (
@@ -64,7 +83,8 @@ export default function SignUp() {
 				lastName: data.get("lastName"),
 				username: data.get("firstName"),
 				organismo: data.get("organismo"),
-				address: data.get("address"),
+				address:
+					`${provincia}, ${municipioSelected} ` + data.get("address"),
 				role: personName,
 			});
 
@@ -153,7 +173,7 @@ export default function SignUp() {
 									autoComplete="email"
 								/>
 							</Grid>
-							<Grid item xs={12}>
+							<Grid item xs={12} sm={6}>
 								<TextField
 									required
 									fullWidth
@@ -164,7 +184,7 @@ export default function SignUp() {
 									autoComplete="new-password"
 								/>
 							</Grid>
-							<Grid item xs={12}>
+							<Grid item xs={12} sm={6}>
 								<TextField
 									required
 									fullWidth
@@ -173,6 +193,60 @@ export default function SignUp() {
 									id="organismo"
 									autoComplete="organismo"
 								/>
+							</Grid>
+							<Grid item xs={12} sm={6}>
+								<FormControl fullWidth>
+									<InputLabel id="provincia">
+										Provincias
+									</InputLabel>
+									<Select
+										labelId="provincia"
+										id="provincia"
+										value={provincia}
+										label="Provincia"
+										onChange={(val) => {
+											setprovincia(val.target.value);
+										}}
+									>
+										{PROVINCIAS.map((provincia) => (
+											<MenuItem
+												key={provincia}
+												value={provincia}
+											>
+												{provincia}
+											</MenuItem>
+										))}
+									</Select>
+								</FormControl>
+							</Grid>
+							<Grid item xs={12} sm={6}>
+								<FormControl fullWidth>
+									<InputLabel id="municipio">
+										Municipios
+									</InputLabel>
+									<Select
+										labelId="municipio"
+										id="municipio"
+										value={municipioSelected}
+										label="municipio"
+										onChange={(val) => {
+											setmunicipioSelected(
+												val.target.value
+											);
+										}}
+									>
+										{municipiosByProvincia.map(
+											(municipio) => (
+												<MenuItem
+													key={municipio}
+													value={municipio}
+												>
+													{municipio}
+												</MenuItem>
+											)
+										)}
+									</Select>
+								</FormControl>
 							</Grid>
 							<Grid item xs={12}>
 								<TextField

@@ -9,87 +9,103 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 // import { useNavigate } from "react-router-dom";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import {  Avatar, Checkbox, FormControlLabel, Stack } from "@mui/material";
+import {
+	Avatar,
+	Checkbox,
+	FormControl,
+	FormControlLabel,
+	InputLabel,
+	MenuItem,
+	Select,
+	Stack,
+} from "@mui/material";
 // import { CustomizedSnackbars, TYPE_MESSAGES } from "../components/MessageAlerts";
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { axiosInstance } from "../config/axios";
 import { useState } from "react";
-import { CustomizedSnackbars, TYPE_MESSAGES } from "../components/MessageAlerts";
+import {
+	CustomizedSnackbars,
+	TYPE_MESSAGES,
+} from "../components/MessageAlerts";
+import { TIPOS_FUENTES } from "../constants/tiposFuentes";
+import { EJES_TEMATICOS } from "../constants/ejesTematicos";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
-export const  RegisterFuente = () => {
+export const RegisterFuente = () => {
 	// const [personName, setPersonName] = React.useState<string[]>(["Usuario"]);
 	// const [loginStatus, setloginStatus] = React.useState({
 	// 	status: TYPE_MESSAGES.NOT_STATUS,
 	// 	message: ''
 	// });
 	const [check, setcheck] = useState(true);
+	const [tipofuente, settipofuente] = useState<string>(TIPOS_FUENTES[0]);
+	const [ejesTematicos, setejesTematicos] = useState<string>(
+		EJES_TEMATICOS[0]
+	);
 	const [statusCreate, setstatusCreate] = useState({
 		status: TYPE_MESSAGES.NOT_STATUS,
-		message: '',
-	})
+		message: "",
+	});
 
 	// // const navigate = useNavigate();
 	// const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
 	// 	if (reason === 'clickaway') return;
-	
+
 	// 	setloginStatus({...loginStatus, status: TYPE_MESSAGES.NOT_STATUS})
 	// };
 
-
 	const getMessages = (message: string) => {
-		if(message.startsWith('title')) return 'Título es requerido';
-		if(message.startsWith('materia')) return 'La materia es requerida';
-		if(message.startsWith('organization')) return 'La organización es requerida';
-		if(message.startsWith('organismo')) return 'Organismo es requerido';
-		if(message.startsWith('url')) return 'El url es requerido';
-		if(message.startsWith('Key')) return message.replace('Key (title)=', '');
-		return 'Error en el formulario contacte al administrador'
-	}
+		if (message.startsWith("title")) return "Título es requerido";
+		if (message.startsWith("materia")) return "La materia es requerida";
+		if (message.startsWith("organization"))
+			return "La organización es requerida";
+		if (message.startsWith("organismo")) return "Organismo es requerido";
+		if (message.startsWith("url")) return "El url es requerido";
+		if (message.startsWith("Key"))
+			return message.replace("Key (title)=", "");
+		if (message.startsWith("editores")) return "Editor es requerido";
+		return "Error en el formulario contacte al administrador";
+	};
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const data = new FormData(event.currentTarget);
-		
 
 		try {
 			await axiosInstance.post("/v1/fuentes/create-fuente", {
-				title: data.get('title'),
-				organization: data.get('organization'),
-				frequency: Number(data.get('frequency') || 0),
+				title: data.get("title"),
+				organization: data.get("organization"),
+				frequency: Number(data.get("frequency") || 0),
 				isOpen: check,
-				editores: data.get('editores'),
-				materia: data.get('materia'),
-				url: data.get('url'),
+				ejesTematicos: ejesTematicos,
+				editores: data.get("editores"),
+				materia: tipofuente,
+				url: data.get("url"),
 			});
 
 			setstatusCreate({
 				status: TYPE_MESSAGES.SUCCESS,
-				message: 'Fuente agregada correctamente'
-			})
-
-		
+				message: "Fuente agregada correctamente",
+			});
 		} catch (error: any) {
-			if(error && error.response && error.response.data){
+			if (error && error.response && error.response.data) {
 				const data = error.response.data;
-				const message = Array.isArray(data.message) ? data.message[0] : data.message
+				const message = Array.isArray(data.message)
+					? data.message[0]
+					: data.message;
 				setstatusCreate({
 					status: TYPE_MESSAGES.ERROR,
-					message: getMessages(message)
-				})
-			}else {
+					message: getMessages(message),
+				});
+			} else {
 				setstatusCreate({
 					status: TYPE_MESSAGES.ERROR,
-					message: 'Error desconocido hable con el administrador'
-				})
+					message: "Error desconocido hable con el administrador",
+				});
 			}
 		}
-
-		
 	};
-
-	
 
 	React.useEffect(() => {
 		const token = localStorage.getItem("token");
@@ -98,10 +114,13 @@ export const  RegisterFuente = () => {
 		}
 	});
 
-	function handleClose(_event?: Event | React.SyntheticEvent<Element, Event> | undefined, reason?: string | undefined): void {
-		if (reason === 'clickaway') return;
-	
-		setstatusCreate({...statusCreate, status: TYPE_MESSAGES.NOT_STATUS})
+	function handleClose(
+		_event?: Event | React.SyntheticEvent<Element, Event> | undefined,
+		reason?: string | undefined
+	): void {
+		if (reason === "clickaway") return;
+
+		setstatusCreate({ ...statusCreate, status: TYPE_MESSAGES.NOT_STATUS });
 	}
 
 	return (
@@ -144,16 +163,14 @@ export const  RegisterFuente = () => {
 								<TextField
 									required
 									fullWidth
-									defaultValue={'1'}
+									defaultValue={"1"}
 									id="frequency"
 									label="Frecuencia"
 									type="number"
 									name="frequency"
 								/>
 							</Grid>
-							<Grid item xs={12}>
-							</Grid>
-							<Grid item xs={12}>
+							<Grid item xs={12} sm={6}>
 								<TextField
 									required
 									fullWidth
@@ -162,16 +179,7 @@ export const  RegisterFuente = () => {
 									id="editores"
 								/>
 							</Grid>
-							<Grid item xs={12}>
-								<TextField
-									required
-									fullWidth
-									name="materia"
-									label="Materia"
-									id="materia"
-								/>
-							</Grid>
-							<Grid item xs={12}>
+							<Grid item xs={12} sm={6}>
 								<TextField
 									required
 									fullWidth
@@ -180,6 +188,55 @@ export const  RegisterFuente = () => {
 									id="organization"
 								/>
 							</Grid>
+							<Grid item xs={12}>
+								<FormControl fullWidth>
+									<InputLabel id="demo-simple-select-label">
+										Tipo de Fuente
+									</InputLabel>
+									<Select
+										labelId="materia"
+										id="materia"
+										value={tipofuente}
+										label="Tipo de Fuente"
+										onChange={(val) => {
+											settipofuente(
+												val.target.value.toString()
+											);
+										}}
+									>
+										{TIPOS_FUENTES.map((tipo) => (
+											<MenuItem key={tipo} value={tipo}>
+												{tipo}
+											</MenuItem>
+										))}
+									</Select>
+								</FormControl>
+							</Grid>
+							<Grid item xs={12}>
+								<FormControl fullWidth>
+									<InputLabel id="ejesTematicos">
+										Ejes Temáticos
+									</InputLabel>
+									<Select
+										labelId="ejesTematicos"
+										id="ejesTematicos"
+										value={ejesTematicos}
+										label="Ejes Temáticos"
+										onChange={(val) => {
+											setejesTematicos(
+												val.target.value.toString()
+											);
+										}}
+									>
+										{EJES_TEMATICOS.map((tipo) => (
+											<MenuItem key={tipo} value={tipo}>
+												{tipo}
+											</MenuItem>
+										))}
+									</Select>
+								</FormControl>
+							</Grid>
+
 							<Grid item xs={12}>
 								<TextField
 									fullWidth
@@ -190,9 +247,13 @@ export const  RegisterFuente = () => {
 								/>
 							</Grid>
 						</Grid>
-						<FormControlLabel onChange = {(va: any) => {
-							setcheck(va.target.checked);
-						}}control={<Checkbox value={check} />} label="Está abierta la fuente?" />
+						<FormControlLabel
+							onChange={(va: any) => {
+								setcheck(va.target.checked);
+							}}
+							control={<Checkbox value={check} />}
+							label="Está abierta la fuente?"
+						/>
 						<Stack
 							spacing={{ xs: 1, sm: 2 }}
 							direction="row"
@@ -206,12 +267,18 @@ export const  RegisterFuente = () => {
 							>
 								Registrar Fuente
 							</Button>
-							
 						</Stack>
-						<CustomizedSnackbars open={statusCreate.status !== TYPE_MESSAGES.NOT_STATUS} message={statusCreate.message} type={statusCreate.status} closeFunction={handleClose}/>
+						<CustomizedSnackbars
+							open={
+								statusCreate.status !== TYPE_MESSAGES.NOT_STATUS
+							}
+							message={statusCreate.message}
+							type={statusCreate.status}
+							closeFunction={handleClose}
+						/>
 					</Box>
 				</Box>
 			</Container>
 		</ThemeProvider>
 	);
-}
+};
