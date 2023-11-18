@@ -58,6 +58,9 @@ export const TableFuenteEditable = () => {
 		if (message.startsWith("Key"))
 			return message.replace("Key (title)=", "");
 		if (message.startsWith("editores")) return "Editor es requerido";
+		if (message.startsWith("El nombre del editor no puede conteneter"))
+			message;
+
 		return "Error en el formulario contacte al administrador";
 	};
 

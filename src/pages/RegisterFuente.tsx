@@ -66,6 +66,8 @@ export const RegisterFuente = () => {
 		if (message.startsWith("Key"))
 			return message.replace("Key (title)=", "");
 		if (message.startsWith("editores")) return "Editor es requerido";
+		if (message.startsWith("El nombre del editor no puede conteneter"))
+			return message;
 		return "Error en el formulario contacte al administrador";
 	};
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
