@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -14,7 +15,7 @@ import CreateIcon from "@mui/icons-material/Create";
 import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
 import SupervisedUserCircleIcon from "@mui/icons-material/SupervisedUserCircle";
 import SmartButtonIcon from "@mui/icons-material/SmartButton";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SignUp from "../pages/SingUp";
 import IconButton from "@mui/material/IconButton";
 import { Button } from "@mui/material";
@@ -23,6 +24,8 @@ import { RegisterFuente } from "../pages/RegisterFuente";
 import { TableUserEditable } from "./CustomTableUserEditable";
 import { TableFuenteEditable } from "./CustomTableFuenteEditable";
 import { DraggableDialog } from "./EstadisticaDialog";
+import { UserDB } from "../interfaces/user";
+import { axiosInstance } from "../config/axios";
 
 const drawerWidth = 240;
 
@@ -36,7 +39,33 @@ enum MENU {
 export const CustomDrawerPermanent = () => {
 	const [showItem, setshowItem] = useState<MENU>(MENU.TABLE_USER);
 	const [openEstadistica, setopenEstadistica] = useState<boolean>(false);
+	const [user, setuser] = useState<UserDB>();
 	const navigate = useNavigate();
+
+	const handleGetUserByToken = async (token: string) => {
+		try {
+			const response = await axiosInstance.get<UserDB>(
+				"/v1/auth/get-user-by-token",
+				{
+					headers: {
+						token,
+					},
+				}
+			);
+			setuser(response.data);
+			console.log({ user: response.data });
+			return response.data;
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
+	useEffect(() => {
+		const token = localStorage.getItem("token");
+		console.log({ token });
+		if (!token) return;
+		handleGetUserByToken(token);
+	}, []);
 
 	return (
 		<Box sx={{ display: "flex" }}>
@@ -68,9 +97,6 @@ export const CustomDrawerPermanent = () => {
 					<Button
 						color="inherit"
 						onClick={() => {
-							// localStorage.removeItem("token");
-							// window.location.href = "/";
-							// navigate("/", { replace: true });
 							setopenEstadistica(true);
 						}}
 					>
@@ -80,7 +106,6 @@ export const CustomDrawerPermanent = () => {
 						color="inherit"
 						onClick={() => {
 							localStorage.removeItem("token");
-							// window.location.href = "/";
 							navigate("/", { replace: true });
 						}}
 					>
@@ -93,10 +118,15 @@ export const CustomDrawerPermanent = () => {
 				sx={{ flexGrow: 1, bgcolor: "background.default", p: 3 }}
 			>
 				<Toolbar />
-				{showItem === MENU.TABLE_USER && <TableUserEditable />}
-				{showItem === MENU.TABLE_FUENTE && <TableFuenteEditable />}
-				{showItem === MENU.REGISTER_USER && <SignUp />}
-				{showItem === MENU.REGISTER_FUENTE && <RegisterFuente />}
+				{["Admin"].includes(user?.role[0] as any) &&
+					showItem === MENU.TABLE_USER && <TableUserEditable />}
+				{/* // eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+				{["Admin", "Informador"].includes(user?.role[0] as any) &&
+					showItem === MENU.TABLE_FUENTE && <TableFuenteEditable />}
+				{["Admin"].includes(user?.role[0] as any) &&
+					showItem === MENU.REGISTER_USER && <SignUp />}
+				{["Admin", "Informador"].includes(user?.role[0] as any) &&
+					showItem === MENU.REGISTER_FUENTE && <RegisterFuente />}
 			</Box>
 			<Drawer
 				sx={{

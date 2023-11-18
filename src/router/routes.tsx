@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import NavBar from "../pages/NavBar";
 import SignIn from "../pages/SingIn";
 // import SignUp from "../pages/SingUp";
-import Album from "../pages/Albun";
+import Album from "../pages/HomePage";
 
 const AppRouter = () => {
 	return (

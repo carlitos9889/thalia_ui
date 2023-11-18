@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { axiosInstance } from "../config/axios";
 import { User } from "../interfaces/user.interface";
 import { Routes, Route, Navigate, redirect } from "react-router-dom";
-import Album from "./Albun";
+import Album from "./HomePage";
 import SignIn from "./SingIn";
 import SignUp from "./SingUp";
 
