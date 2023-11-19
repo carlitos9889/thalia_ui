@@ -72,6 +72,13 @@ export default function SignUp() {
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const data = new FormData(event.currentTarget);
+		if (!data.get("address")) {
+			setloginStatus({
+				status: TYPE_MESSAGES.ERROR,
+				message: getMessages("address"),
+			});
+			return;
+		}
 
 		try {
 			axiosInstance.defaults.headers.post[
