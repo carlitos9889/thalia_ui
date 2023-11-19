@@ -57,7 +57,7 @@ export const TableUserEditable = () => {
 		if (message.startsWith("address")) return "Dirección es requerido";
 		if (message.startsWith("El Nombre no puede")) return message;
 		if (message.startsWith("El Apellido no puede")) return message;
-		if (message.startsWith("Key"))
+		if (message.startsWith("Key") || message.startsWith("Ya existe"))
 			return message.replace("Key", "").replace("(email)=", "");
 		return "Error en el formulario contacte al administrador";
 	};
