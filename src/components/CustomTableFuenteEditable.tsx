@@ -55,7 +55,10 @@ export const TableFuenteEditable = () => {
 			return "La organización es requerida";
 		if (message.startsWith("organismo")) return "Organismo es requerido";
 		if (message.startsWith("url")) return "El url es requerido";
-		if (message.startsWith("Key"))
+		if (
+			message.startsWith("Key") ||
+			message.startsWith("Ya existe la llave (title)")
+		)
 			return message.replace("Key (title)=", "");
 		if (message.startsWith("editores")) return "Editor es requerido";
 		if (message.startsWith("El nombre del editor no puede conteneter"))
