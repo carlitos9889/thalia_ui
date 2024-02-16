@@ -135,7 +135,7 @@ export const NestedList = () => {
 		} catch (error) {
 			console.log({ error });
 		}
-	});
+	}, []);
 
 	return (
 		<List
