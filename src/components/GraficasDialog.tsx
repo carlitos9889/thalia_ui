@@ -57,7 +57,7 @@ const GraficasDialog: React.FC<PropsDialogGraficas> = ({
 		GRAFICOS.TABLE
 	);
 
-	const { toPDF, targetRef } = usePDF({ filename: " graficos.pdf" });
+	const { toPDF, targetRef } = usePDF({ filename: "graficos.pdf" });
 	return (
 		<React.Fragment>
 			<Dialog
@@ -131,20 +131,10 @@ const GraficasDialog: React.FC<PropsDialogGraficas> = ({
 						</Container>
 					)}
 					{showGrafica == GRAFICOS.NODES && (
-						<Container ref={targetRef} maxWidth="md">
+						<Container ref={targetRef} maxWidth="lg">
 							<Graph data={generateDataWithConnections(20)} />
 						</Container>
 					)}
-					{/* {showGrafica == GRAFICOS.MAPAS_ONLY && (
-					<Container ref={targetRef} maxWidth="md">
-						<CustomMapMarcador />
-					</Container>
-				)}
-				{showGrafica == GRAFICOS.MAPAS_MANY && (
-					<Container ref={targetRef} maxWidth="md">
-						<CustomMapMarcadores />
-					</Container>
-				)} */}
 				</CustomAppBar>
 			</Dialog>
 		</React.Fragment>

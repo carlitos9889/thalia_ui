@@ -78,6 +78,7 @@ export const Graph: React.FC<GraphProps> = ({ data }) => {
 
 	return (
 		<Scatter
+			height={500}
 			data={chartData as any}
 			options={options}
 			datasetIdKey="Carlos"
