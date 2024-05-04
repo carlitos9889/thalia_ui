@@ -8,4 +8,6 @@ export interface FuenteDB {
 	title: string;
 	url: string;
 	ejesTematicos: string;
+	is_monitoring: boolean;
+	isNew: true;
 }

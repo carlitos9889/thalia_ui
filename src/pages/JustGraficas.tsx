@@ -2,7 +2,7 @@ import { usePDF } from "react-to-pdf";
 import CustomAppBar from "../components/CustomAppBar";
 import { Container } from "@mui/material";
 import { useState } from "react";
-import FullFeaturedCrudGrid from "../components/CustomTable";
+import FullFeaturedCrudGrid from "../components/FullFeaturedCrudGrid";
 import { CustomLinearChart } from "../components/charts/CustomLineChart";
 import { CustomPie } from "../components/charts/CustomPie";
 import Graph from "../components/charts/Nodes";

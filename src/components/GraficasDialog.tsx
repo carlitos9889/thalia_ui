@@ -6,7 +6,7 @@ import { usePDF } from "react-to-pdf";
 import { GRAFICOS } from "../enums/GRAFICOS";
 import { Container } from "@mui/material";
 import CustomAppBar from "./CustomAppBar";
-import FullFeaturedCrudGrid from "./CustomTable";
+import FullFeaturedCrudGrid from "./FullFeaturedCrudGrid";
 import { CustomLinearChart } from "./charts/CustomLineChart";
 import { CustomPie } from "./charts/CustomPie";
 import Graph from "./charts/Nodes";
