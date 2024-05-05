@@ -116,7 +116,7 @@ export const CustomDrawerPermanent = () => {
 						<Button
 							color="inherit"
 							onClick={() => {
-								localStorage.removeItem("token");
+								// localStorage.removeItem("token");
 								navigate("/", { replace: true });
 							}}
 						>
