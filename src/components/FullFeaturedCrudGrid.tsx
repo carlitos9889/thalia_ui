@@ -9,6 +9,7 @@ import {
 } from "@mui/x-data-grid";
 import SnackCustom from "./SnackCustom";
 import useFuentes from "../hooks/useFuentes";
+import { AlertDialogSlide } from "./CustomDialog";
 
 export default function FullFeaturedCrudGrid() {
 	const {
@@ -21,7 +22,10 @@ export default function FullFeaturedCrudGrid() {
 		rowModesModel,
 		setrows,
 		setrowmodesmodel,
-		deleteFuenteById,
+		currentId,
+		handleChangeDialogDelete,
+		openDialogDelete,
+		acceptDialog,
 	} = useFuentes();
 
 	const columns: GridColDef[] = [
@@ -45,7 +49,11 @@ export default function FullFeaturedCrudGrid() {
 						icon={<DeleteIcon />}
 						label="Delete"
 						onClick={() => {
-							deleteFuenteById(id as string);
+							currentId.current.id = id as string;
+							currentId.current.title =
+								rows.find((r) => r.id === id)?.title || "";
+							handleChangeDialogDelete(true);
+							// deleteFuenteById(id as string);
 						}}
 						color="inherit"
 					/>,
@@ -152,6 +160,13 @@ export default function FullFeaturedCrudGrid() {
 				hasError={true}
 				open={fuenteModels.error}
 				handleClose={resetFuenteModel}
+			/>
+			<AlertDialogSlide
+				description={`Desea eliminar de forma peramanente la fuente ${currentId.current.title}?`}
+				title={"Eliminar"}
+				open={openDialogDelete}
+				close={() => handleChangeDialogDelete(false)}
+				accept={acceptDialog}
 			/>
 		</Box>
 	);

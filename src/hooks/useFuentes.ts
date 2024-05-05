@@ -18,6 +18,21 @@ const useFuentes = () => {
 		success: false,
 		error: false,
 	});
+	const [openDialogDelete, setopenDialogDelete] =
+		React.useState<boolean>(false);
+	const currentId = React.useRef({
+		id: "",
+		title: "",
+	});
+
+	const handleChangeDialogDelete = (value: boolean) => {
+		setopenDialogDelete(value);
+	};
+	const acceptDialog = () => {
+		const id = currentId.current.id;
+		deleteFuenteById(id);
+		handleChangeDialogDelete(false);
+	};
 
 	const handleSucces = () => {
 		setFuenteModels((prev) => ({
@@ -97,6 +112,10 @@ const useFuentes = () => {
 		setrows,
 		setrowmodesmodel,
 		deleteFuenteById,
+		openDialogDelete,
+		currentId,
+		handleChangeDialogDelete,
+		acceptDialog,
 	};
 };
 
