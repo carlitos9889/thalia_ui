@@ -117,7 +117,7 @@ export const CustomDrawerPermanent = () => {
 							color="inherit"
 							onClick={() => {
 								// localStorage.removeItem("token");
-								navigate("/", { replace: true });
+								navigate("/main");
 							}}
 						>
 							Logout
