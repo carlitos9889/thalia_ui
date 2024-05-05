@@ -78,12 +78,6 @@ export default function FullFeaturedCrudGrid() {
 			editable: true,
 		},
 		{
-			field: "isOpen",
-			headerName: "Abierta",
-			minWidth: 150,
-			editable: true,
-		},
-		{
 			field: "materia",
 			headerName: "Materia",
 			minWidth: 150,
