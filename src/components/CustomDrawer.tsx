@@ -40,6 +40,10 @@ enum MENU {
 export const CustomDrawerPermanent = () => {
 	const [showItem, setshowItem] = useState<MENU>(MENU.TABLE_USER);
 	const [openEstadistica, setopenEstadistica] = useState<boolean>(false);
+	const [openGraficas, setopenGraficas] = useState<boolean>(false);
+	const handleOpenGraficas = (value: boolean) => {
+		setopenGraficas(value);
+	};
 	const [user, setuser] = useState<UserDB>();
 	const navigate = useNavigate();
 
@@ -68,7 +72,7 @@ export const CustomDrawerPermanent = () => {
 		handleGetUserByToken(token);
 	}, []);
 
-	if (user && user.role[0] === "Admin") {
+	if (user && user.role[0] === "Admin" && !openGraficas) {
 		return (
 			<Box sx={{ display: "flex" }}>
 				<CssBaseline />
@@ -108,6 +112,7 @@ export const CustomDrawerPermanent = () => {
 							color="inherit"
 							onClick={() => {
 								// localStorage.removeItem("token");
+								handleOpenGraficas(true);
 								navigate("/main", { replace: true });
 							}}
 						>

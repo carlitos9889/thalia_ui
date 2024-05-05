@@ -11,8 +11,8 @@ const AppRouter = () => {
 				{/* <Route index element={<HomePage />} /> */}
 				<Route index element={<SignIn />} />
 				{/* <Route path="register" element={<SignUp />} /> */}
+				<Route path="main" element={<Album />} />
 			</Route>
-			<Route path="/main" element={<Album />} />
 		</Routes>
 	);
 };
