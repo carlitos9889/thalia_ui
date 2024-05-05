@@ -26,7 +26,6 @@ import { TableFuenteEditable } from "./CustomTableFuenteEditable";
 import { DraggableDialog } from "./EstadisticaDialog";
 import { UserDB } from "../interfaces/user";
 import { axiosInstance } from "../config/axios";
-import GraficasDialog from "./GraficasDialog";
 import JustGraficas from "../pages/JustGraficas";
 
 const drawerWidth = 240;
@@ -40,7 +39,6 @@ enum MENU {
 
 export const CustomDrawerPermanent = () => {
 	const [showItem, setshowItem] = useState<MENU>(MENU.TABLE_USER);
-	const [openGraficas, setOpenGraficas] = useState<boolean>(false);
 	const [openEstadistica, setopenEstadistica] = useState<boolean>(false);
 	const [user, setuser] = useState<UserDB>();
 	const navigate = useNavigate();
@@ -61,10 +59,6 @@ export const CustomDrawerPermanent = () => {
 		} catch (error) {
 			console.error(error);
 		}
-	};
-	const handleClickOpen = () => setOpenGraficas(true);
-	const handleClose = () => {
-		setOpenGraficas(false);
 	};
 
 	useEffect(() => {
@@ -115,7 +109,6 @@ export const CustomDrawerPermanent = () => {
 							onClick={() => {
 								// localStorage.removeItem("token");
 								// navigate("/", { replace: true });
-								handleClickOpen();
 							}}
 						>
 							Gráficas
@@ -223,10 +216,6 @@ export const CustomDrawerPermanent = () => {
 					<DraggableDialog
 						open={openEstadistica}
 						handleClose={() => setopenEstadistica(false)}
-					/>
-					<GraficasDialog
-						open={openGraficas}
-						handleClose={handleClose}
 					/>
 				</Drawer>
 			</Box>

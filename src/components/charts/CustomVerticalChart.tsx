@@ -31,7 +31,20 @@ const options = {
 	},
 };
 
-const labels = ["January", "February", "March", "April", "May", "June", "July"];
+const labels = [
+	"Enero",
+	"Febrero",
+	"Marzo",
+	"Abril",
+	"Mayo",
+	"Junio",
+	"Julio",
+	"Agosto",
+	"Septiembre",
+	"Octubre",
+	"Noviembre",
+	"Diciembre",
+];
 
 const data = {
 	labels,

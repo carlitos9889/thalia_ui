@@ -43,4 +43,10 @@ export class AxiosConfig {
 		const { data } = await axiosInstance.delete(`/v1/fuentes/${id}`);
 		return data;
 	}
+	static async getAllRegisters() {
+		const { data } = await axiosInstance.get(
+			"/v1/fuentes/get-all-registers"
+		);
+		return data;
+	}
 }

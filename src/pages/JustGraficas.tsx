@@ -6,8 +6,10 @@ import FullFeaturedCrudGrid from "../components/FullFeaturedCrudGrid";
 import { CustomLinearChart } from "../components/charts/CustomLineChart";
 import { CustomPie } from "../components/charts/CustomPie";
 import Graph from "../components/charts/Nodes";
-import JSON_AUX from "../const/contants";
+import JSON_AUX, { labels } from "../const/contants";
 import { GRAFICOS } from "../enums/GRAFICOS";
+import React from "react";
+import { AxiosConfig } from "../config/axios";
 
 const JustGraficas = () => {
 	const [showGrafica, setshowGrafica] = useState<GRAFICOS>(GRAFICOS.TABLE);
@@ -36,6 +38,17 @@ const JustGraficas = () => {
 		return { nodes, links };
 	};
 
+	const [dataLinea, setdataLinea] = useState({});
+
+	const getAllRegister = async () => {
+		const resp = await AxiosConfig.getAllRegisters();
+		setdataLinea(resp);
+	};
+
+	React.useEffect(() => {
+		getAllRegister();
+	}, []);
+
 	return (
 		<>
 			<CustomAppBar
@@ -52,7 +65,51 @@ const JustGraficas = () => {
 				)}
 				{showGrafica == GRAFICOS.LINEAL && (
 					<Container ref={targetRef} maxWidth="md">
-						<CustomLinearChart data={JSON_AUX.allLinesLinear} />
+						<CustomLinearChart
+							data={{
+								labels: labels,
+								datasets: [
+									{
+										label: "Título",
+										data: labels.map(
+											(_, i) =>
+												dataLinea[`${i + 1}`].title
+													.length
+										),
+										borderColor: "rgb(26, 254, 247)",
+										backgroundColor:
+											"rgba(26, 254, 247, 0.5)",
+										yAxisID: "y1",
+									},
+
+									{
+										label: "Editorial",
+										data: labels.map(
+											(_, i) =>
+												dataLinea[`${i + 1}`].publisher
+													.length
+										),
+
+										borderColor: "rgb(28, 93, 4)",
+										backgroundColor: "rgba(28, 93, 4, 0.5)",
+										yAxisID: "y1",
+									},
+									{
+										label: "Autores",
+										data: labels.map(
+											(_, i) =>
+												dataLinea[`${i + 1}`].creator
+													.length
+										),
+
+										borderColor: "rgb(284, 93, 4)",
+										backgroundColor:
+											"rgba(284, 93, 4, 0.5)",
+										yAxisID: "y1",
+									},
+								],
+							}}
+						/>
 					</Container>
 				)}
 				{showGrafica == GRAFICOS.PIE && (

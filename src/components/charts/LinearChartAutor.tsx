@@ -50,14 +50,27 @@ const options = {
 	},
 };
 
-const labels = ["January", "February", "March", "April", "May", "June", "July"];
+const labels: string[] = [
+	"Enero",
+	"Febrero",
+	"Marzo",
+	"Abril",
+	"Mayo",
+	"Junio",
+	"Julio",
+	"Agosto",
+	"Septiembre",
+	"Octubre",
+	"Noviembre",
+	"Diciembre",
+];
 
 const data = {
 	labels,
 	datasets: [
 		{
 			label: "Autor",
-			data: labels.map(() => Math.random() * 1000),
+			data: labels.map(() => Math.random() * 2000),
 			borderColor: "rgb(9, 122, 118)",
 			backgroundColor: "rgba(9, 122, 118, 0.5)",
 			yAxisID: "y",

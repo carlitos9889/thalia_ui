@@ -53,7 +53,6 @@ export default function FullFeaturedCrudGrid() {
 							currentId.current.title =
 								rows.find((r) => r.id === id)?.title || "";
 							handleChangeDialogDelete(true);
-							// deleteFuenteById(id as string);
 						}}
 						color="inherit"
 					/>,
