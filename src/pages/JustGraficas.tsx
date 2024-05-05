@@ -38,7 +38,13 @@ const JustGraficas = () => {
 		return { nodes, links };
 	};
 
-	const [dataLinea, setdataLinea] = useState({});
+	const [dataLinea, setdataLinea] = useState<
+		{
+			title: [];
+			publisher: [];
+			creator: [];
+		}[]
+	>([]);
 
 	const getAllRegister = async () => {
 		const resp = await AxiosConfig.getAllRegisters();
